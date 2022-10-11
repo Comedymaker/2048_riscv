@@ -13,6 +13,7 @@
 #include <signal.h>
 #include "devicelib.h"
 #include "input.c"
+#include "draw.h"
 #define SIZE 4
 uint32_t score = 0;
 uint8_t scheme = 0;
@@ -42,51 +43,51 @@ uint8_t getNumberLength(uint32_t number)
 	return count;
 }
 
-void drawBoard(uint8_t board[SIZE][SIZE])
-{
-	uint8_t x, y, fg, bg;
-	printf("\033[H");
-	printf("2048.c %17d pts\n\n", score);
-	for (y = 0; y < SIZE; y++)
-	{
-		for (x = 0; x < SIZE; x++)
-		{
-			getColors(board[x][y], &fg, &bg);
-			printf("\033[38;5;%d;48;5;%dm", fg, bg); // set color
-			printf("       ");
-			printf("\033[m"); // reset
-		}
-		printf("\n");
-		for (x = 0; x < SIZE; x++)
-		{
-			getColors(board[x][y], &fg, &bg);
-			printf("\033[38;5;%d;48;5;%dm", fg, bg); // set color
-			if (board[x][y] != 0)
-			{
-				uint32_t number = 1 << board[x][y];
-				uint8_t t = 7 - getNumberLength(number);
-				printf("%*s%u%*s", t - t / 2, "", number, t / 2, "");
-			}
-			else
-			{
-				printf("   ·   ");
-			}
-			printf("\033[m"); // reset
-		}
-		printf("\n");
-		for (x = 0; x < SIZE; x++)
-		{
-			getColors(board[x][y], &fg, &bg);
-			printf("\033[38;5;%d;48;5;%dm", fg, bg); // set color
-			printf("       ");
-			printf("\033[m"); // reset
-		}
-		printf("\n");
-	}
-	printf("\n");
-	printf("        ←,↑,→,↓ or q        \n");
-	printf("\033[A"); // one line up
-}
+// void drawBoard(uint8_t board[SIZE][SIZE])
+// {
+// 	uint8_t x, y, fg, bg;
+// 	printf("\033[H");
+// 	printf("2048.c %17d pts\n\n", score);
+// 	for (y = 0; y < SIZE; y++)
+// 	{
+// 		for (x = 0; x < SIZE; x++)
+// 		{
+// 			getColors(board[x][y], &fg, &bg);
+// 			printf("\033[38;5;%d;48;5;%dm", fg, bg); // set color
+// 			printf("       ");
+// 			printf("\033[m"); // reset
+// 		}
+// 		printf("\n");
+// 		for (x = 0; x < SIZE; x++)
+// 		{
+// 			getColors(board[x][y], &fg, &bg);
+// 			printf("\033[38;5;%d;48;5;%dm", fg, bg); // set color
+// 			if (board[x][y] != 0)
+// 			{
+// 				uint32_t number = 1 << board[x][y];
+// 				uint8_t t = 7 - getNumberLength(number);
+// 				printf("%*s%u%*s", t - t / 2, "", number, t / 2, "");
+// 			}
+// 			else
+// 			{
+// 				printf("   ·   ");
+// 			}
+// 			printf("\033[m"); // reset
+// 		}
+// 		printf("\n");
+// 		for (x = 0; x < SIZE; x++)
+// 		{
+// 			getColors(board[x][y], &fg, &bg);
+// 			printf("\033[38;5;%d;48;5;%dm", fg, bg); // set color
+// 			printf("       ");
+// 			printf("\033[m"); // reset
+// 		}
+// 		printf("\n");
+// 	}
+// 	printf("\n");
+// 	printf("        ←,↑,→,↓ or q        \n");
+// 	printf("\033[A"); // one line up
+// }
 
 uint8_t findTarget(uint8_t array[SIZE], uint8_t x, uint8_t stop)
 {
@@ -312,7 +313,7 @@ void initBoard(uint8_t board[SIZE][SIZE])
 	}
 	addRandom(board);
 	addRandom(board);
-	drawBoard(board);
+	// drawBoard(board);
 	score = 0;
 }
 
@@ -429,6 +430,7 @@ int main(int argc, char *argv[])
 	uint8_t board[SIZE][SIZE];
 	char c;
 	bool success;
+	draw_start_view();
 	struct KeyMap key, key_history;
     memset(&key, 0, sizeof(key));
     memset(&key_history, 0, sizeof(key_history));
@@ -509,10 +511,10 @@ int main(int argc, char *argv[])
 		}
 		if (success)
 		{
-			drawBoard(board);
+			// drawBoard(board);
 			sleep(150000);
 			addRandom(board);
-			drawBoard(board);
+			// drawBoard(board);
 			if (gameEnded(board))
 			{
 				printf("         GAME OVER          \n");
