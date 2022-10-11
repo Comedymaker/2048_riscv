@@ -7,20 +7,20 @@
  */
 
 #define _XOPEN_SOURCE 500
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 #include <termios.h>
-#include <stdbool.h>
 #include <stdint.h>
-#include <time.h>	//function in time.h need to be exchanged! 
+//#include <time.h>	//function in time.h need to be exchanged! 
 #include <signal.h>
-
+#include "devicelib.h"
+#include "input.c"
 #define SIZE 4
 uint32_t score = 0;
 uint8_t scheme = 0;
-
+typedef enum{
+	false,
+	true
+}
+bool;
 void getColors(uint8_t value, uint8_t *foreground, uint8_t *background)
 {
 	uint8_t original[] = {8, 255, 1, 255, 2, 255, 3, 255, 4, 255, 5, 255, 6, 255, 7, 255, 9, 0, 10, 0, 11, 0, 12, 0, 13, 0, 14, 0, 255, 0, 255, 0};
@@ -273,7 +273,7 @@ void addRandom(uint8_t board[SIZE][SIZE])
 
 	if (!initialized)
 	{
-		srand(time(NULL));
+		srand(time());
 		initialized = true;
 	}
 
@@ -316,177 +316,201 @@ void initBoard(uint8_t board[SIZE][SIZE])
 	score = 0;
 }
 
-void setBufferedInput(bool enable)
-{
-	static bool enabled = true;
-	static struct termios old;
-	struct termios new;
+// void setBufferedInput(bool enable)
+// {
+// 	static bool enabled = true;
+// 	static struct termios old;
+// 	struct termios new;
 
-	if (enable && !enabled)
-	{
-		// restore the former settings
-		tcsetattr(STDIN_FILENO, TCSANOW, &old);
-		// set the new state
-		enabled = true;
-	}
-	else if (!enable && enabled)
-	{
-		// get the terminal settings for standard input
-		tcgetattr(STDIN_FILENO, &new);
-		// we want to keep the old setting to restore them at the end
-		old = new;
-		// disable canonical mode (buffered i/o) and local echo
-		new.c_lflag &= (~ICANON & ~ECHO);
-		// set the new settings immediately
-		tcsetattr(STDIN_FILENO, TCSANOW, &new);
-		// set the new state
-		enabled = false;
-	}
-}
+// 	if (enable && !enabled)
+// 	{
+// 		// restore the former settings
+// 		tcsetattr(STDIN_FILENO, TCSANOW, &old);
+// 		// set the new state
+// 		enabled = true;
+// 	}
+// 	else if (!enable && enabled)
+// 	{
+// 		// get the terminal settings for standard input
+// 		tcgetattr(STDIN_FILENO, &new);
+// 		// we want to keep the old setting to restore them at the end
+// 		old = new;
+// 		// disable canonical mode (buffered i/o) and local echo
+// 		new.c_lflag &= (~ICANON & ~ECHO);
+// 		// set the new settings immediately
+// 		tcsetattr(STDIN_FILENO, TCSANOW, &new);
+// 		// set the new state
+// 		enabled = false;
+// 	}
+// }
 
-int test()
-{
-	uint8_t array[SIZE];
-	// these are exponents with base 2 (1=2 2=4 3=8)
-	uint8_t data[] = {
-		0, 0, 0, 1, 1, 0, 0, 0,
-		0, 0, 1, 1, 2, 0, 0, 0,
-		0, 1, 0, 1, 2, 0, 0, 0,
-		1, 0, 0, 1, 2, 0, 0, 0,
-		1, 0, 1, 0, 2, 0, 0, 0,
-		1, 1, 1, 0, 2, 1, 0, 0,
-		1, 0, 1, 1, 2, 1, 0, 0,
-		1, 1, 0, 1, 2, 1, 0, 0,
-		1, 1, 1, 1, 2, 2, 0, 0,
-		2, 2, 1, 1, 3, 2, 0, 0,
-		1, 1, 2, 2, 2, 3, 0, 0,
-		3, 0, 1, 1, 3, 2, 0, 0,
-		2, 0, 1, 1, 2, 2, 0, 0};
-	uint8_t *in, *out;
-	uint8_t t, tests;
-	uint8_t i;
-	bool success = true;
+// int test()
+// {
+// 	uint8_t array[SIZE];
+// 	// these are exponents with base 2 (1=2 2=4 3=8)
+// 	uint8_t data[] = {
+// 		0, 0, 0, 1, 1, 0, 0, 0,
+// 		0, 0, 1, 1, 2, 0, 0, 0,
+// 		0, 1, 0, 1, 2, 0, 0, 0,
+// 		1, 0, 0, 1, 2, 0, 0, 0,
+// 		1, 0, 1, 0, 2, 0, 0, 0,
+// 		1, 1, 1, 0, 2, 1, 0, 0,
+// 		1, 0, 1, 1, 2, 1, 0, 0,
+// 		1, 1, 0, 1, 2, 1, 0, 0,
+// 		1, 1, 1, 1, 2, 2, 0, 0,
+// 		2, 2, 1, 1, 3, 2, 0, 0,
+// 		1, 1, 2, 2, 2, 3, 0, 0,
+// 		3, 0, 1, 1, 3, 2, 0, 0,
+// 		2, 0, 1, 1, 2, 2, 0, 0};
+// 	uint8_t *in, *out;
+// 	uint8_t t, tests;
+// 	uint8_t i;
+// 	bool success = true;
 
-	tests = (sizeof(data) / sizeof(data[0])) / (2 * SIZE);
-	for (t = 0; t < tests; t++)
-	{
-		in = data + t * 2 * SIZE;
-		out = in + SIZE;
-		for (i = 0; i < SIZE; i++)
-		{
-			array[i] = in[i];
-		}
-		slideArray(array);
-		for (i = 0; i < SIZE; i++)
-		{
-			if (array[i] != out[i])
-			{
-				success = false;
-			}
-		}
-		if (success == false)
-		{
-			for (i = 0; i < SIZE; i++)
-			{
-				printf("%d ", in[i]);
-			}
-			printf("=> ");
-			for (i = 0; i < SIZE; i++)
-			{
-				printf("%d ", array[i]);
-			}
-			printf("expected ");
-			for (i = 0; i < SIZE; i++)
-			{
-				printf("%d ", in[i]);
-			}
-			printf("=> ");
-			for (i = 0; i < SIZE; i++)
-			{
-				printf("%d ", out[i]);
-			}
-			printf("\n");
-			break;
-		}
-	}
-	if (success)
-	{
-		printf("All %u tests executed successfully\n", tests);
-	}
-	return !success;
-}
+// 	tests = (sizeof(data) / sizeof(data[0])) / (2 * SIZE);
+// 	for (t = 0; t < tests; t++)
+// 	{
+// 		in = data + t * 2 * SIZE;
+// 		out = in + SIZE;
+// 		for (i = 0; i < SIZE; i++)
+// 		{
+// 			array[i] = in[i];
+// 		}
+// 		slideArray(array);
+// 		for (i = 0; i < SIZE; i++)
+// 		{
+// 			if (array[i] != out[i])
+// 			{
+// 				success = false;
+// 			}
+// 		}
+// 		if (success == false)
+// 		{
+// 			for (i = 0; i < SIZE; i++)
+// 			{
+// 				printf("%d ", in[i]);
+// 			}
+// 			printf("=> ");
+// 			for (i = 0; i < SIZE; i++)
+// 			{
+// 				printf("%d ", array[i]);
+// 			}
+// 			printf("expected ");
+// 			for (i = 0; i < SIZE; i++)
+// 			{
+// 				printf("%d ", in[i]);
+// 			}
+// 			printf("=> ");
+// 			for (i = 0; i < SIZE; i++)
+// 			{
+// 				printf("%d ", out[i]);
+// 			}
+// 			printf("\n");
+// 			break;
+// 		}
+// 	}
+// 	if (success)
+// 	{
+// 		printf("All %u tests executed successfully\n", tests);
+// 	}
+// 	return !success;
+// }
 
-void signal_callback_handler(int signum)
-{
-	printf("         TERMINATED         \n");
-	setBufferedInput(true);
-	printf("\033[?25h\033[m");
-	exit(signum);
-}
+// void signal_callback_handler(int signum)
+// {
+// 	printf("         TERMINATED         \n");
+// 	setBufferedInput(true);
+// 	printf("\033[?25h\033[m");
+// 	exit(signum);
+// }
 
 int main(int argc, char *argv[])
 {
 	uint8_t board[SIZE][SIZE];
 	char c;
 	bool success;
+	struct KeyMap key, key_history;
+    memset(&key, 0, sizeof(key));
+    memset(&key_history, 0, sizeof(key_history));
+	// if (argc == 2 && strcmp(argv[1], "test") == 0)
+	// {
+	// 	return test();
+	// }
+	// if (argc == 2 && strcmp(argv[1], "blackwhite") == 0)
+	// {
+	// 	scheme = 1;
+	// }
+	// if (argc == 2 && strcmp(argv[1], "bluered") == 0)
+	// {
+	// 	scheme = 2;
+	// }
 
-	if (argc == 2 && strcmp(argv[1], "test") == 0)
-	{
-		return test();
-	}
-	if (argc == 2 && strcmp(argv[1], "blackwhite") == 0)
-	{
-		scheme = 1;
-	}
-	if (argc == 2 && strcmp(argv[1], "bluered") == 0)
-	{
-		scheme = 2;
-	}
-
-	printf("\033[?25l\033[2J");
+	// printf("\033[?25l\033[2J");
 
 	// register signal handler for when ctrl-c is pressed
-	signal(SIGINT, signal_callback_handler);
-
+	// signal(SIGINT, signal_callback_handler);
+	int64_t game_start_time = time();
+	//srand(game_start_time);
 	initBoard(board);
-	setBufferedInput(false);
+	// setBufferedInput(false);
+	wait_any_key_down(&key);
 	while (true)
 	{
-		c = getchar();
-		if (c == -1)
+		// c = getchar();
+		// if (c == -1)
+		// {
+		// 	puts("\nError! Cannot read keyboard input!");
+		// 	break;
+		// }
+		// switch (c)
+		// {
+		// case 97:  // 'a' key
+		// case 104: // 'h' key
+		// case 68:  // left arrow
+		// 	success = moveLeft(board);
+		// 	break;
+		// case 100: // 'd' key
+		// case 108: // 'l' key
+		// case 67:  // right arrow
+		// 	success = moveRight(board);
+		// 	break;
+		// case 119: // 'w' key
+		// case 107: // 'k' key
+		// case 65:  // up arrow
+		// 	success = moveUp(board);
+		// 	break;
+		// case 115: // 's' key
+		// case 106: // 'j' key
+		// case 66:  // down arrow
+		// 	success = moveDown(board);
+		// 	break;
+		// default:
+		// 	success = false;
+		// }
+		success = false;
+		if (key.down)
 		{
-			puts("\nError! Cannot read keyboard input!");
-			break;
-		}
-		switch (c)
-		{
-		case 97:  // 'a' key
-		case 104: // 'h' key
-		case 68:  // left arrow
-			success = moveLeft(board);
-			break;
-		case 100: // 'd' key
-		case 108: // 'l' key
-		case 67:  // right arrow
-			success = moveRight(board);
-			break;
-		case 119: // 'w' key
-		case 107: // 'k' key
-		case 65:  // up arrow
-			success = moveUp(board);
-			break;
-		case 115: // 's' key
-		case 106: // 'j' key
-		case 66:  // down arrow
 			success = moveDown(board);
-			break;
-		default:
-			success = false;
+		}
+		
+		if (key.up)
+		{
+			success = moveUp(board);
+		}
+
+		if (key.left)
+		{
+			success = moveLeft(board);
+		}
+
+		if (key.right)
+		{
+			success = moveRight(board);
 		}
 		if (success)
 		{
 			drawBoard(board);
-			usleep(150000);
+			sleep(150000);
 			addRandom(board);
 			drawBoard(board);
 			if (gameEnded(board))
@@ -495,30 +519,31 @@ int main(int argc, char *argv[])
 				break;
 			}
 		}
-		if (c == 'q')
-		{
-			printf("        QUIT? (y/n)         \n");
-			c = getchar();
-			if (c == 'y')
-			{
-				break;
-			}
-			drawBoard(board);
-		}
-		if (c == 'r')
-		{
-			printf("       RESTART? (y/n)       \n");
-			c = getchar();
-			if (c == 'y')
-			{
-				initBoard(board);
-			}
-			drawBoard(board);
-		}
+		// if (c == 'q')
+		// {
+		// 	printf("        QUIT? (y/n)         \n");
+		// 	c = getchar();
+		// 	if (c == 'y')
+		// 	{
+		// 		break;
+		// 	}
+		// 	drawBoard(board);
+		// }
+		// if (c == 'r')
+		// {
+		// 	printf("       RESTART? (y/n)       \n");
+		// 	c = getchar();
+		// 	if (c == 'y')
+		// 	{
+		// 		initBoard(board);
+		// 	}
+		// 	drawBoard(board);
+		// }
+		wait_any_key_down(&key);
 	}
-	setBufferedInput(true);
+	// setBufferedInput(true);
 
-	printf("\033[?25h\033[m");
+	// printf("\033[?25h\033[m");
 
-	return EXIT_SUCCESS;
+	return 0;
 }
