@@ -1,0 +1,32 @@
+[
+{
+  "directory": "/home/comedymaker/2048_riscv/build",
+  "command": "/usr/bin/clang -DRISCV  --target=riscv32-unknown-unknown -march=rv32im -ffreestanding -fno-builtin -nostdlib -mno-relax -fno-PIE -G=0 -Oz -flto -o CMakeFiles/2048_rv.dir/src/2048.c.o -c /home/comedymaker/2048_riscv/src/2048.c",
+  "file": "/home/comedymaker/2048_riscv/src/2048.c"
+},
+{
+  "directory": "/home/comedymaker/2048_riscv/build",
+  "command": "/usr/bin/clang -DRISCV  --target=riscv32-unknown-unknown -march=rv32im -ffreestanding -fno-builtin -nostdlib -mno-relax -fno-PIE -G=0 -Oz -flto -o CMakeFiles/2048_rv.dir/src/draw.c.o -c /home/comedymaker/2048_riscv/src/draw.c",
+  "file": "/home/comedymaker/2048_riscv/src/draw.c"
+},
+{
+  "directory": "/home/comedymaker/2048_riscv/build",
+  "command": "/usr/bin/clang -DRISCV  --target=riscv32-unknown-unknown -march=rv32im -ffreestanding -fno-builtin -nostdlib -mno-relax -fno-PIE -G=0 -Oz -flto -o CMakeFiles/2048_rv.dir/src/random.c.o -c /home/comedymaker/2048_riscv/src/random.c",
+  "file": "/home/comedymaker/2048_riscv/src/random.c"
+},
+{
+  "directory": "/home/comedymaker/2048_riscv/build",
+  "command": "/usr/bin/clang -DRISCV  --target=riscv32-unknown-unknown -march=rv32im -ffreestanding -fno-builtin -nostdlib -mno-relax -fno-PIE -G=0 -Oz -flto -o CMakeFiles/2048_rv.dir/src/graphics.c.o -c /home/comedymaker/2048_riscv/src/graphics.c",
+  "file": "/home/comedymaker/2048_riscv/src/graphics.c"
+},
+{
+  "directory": "/home/comedymaker/2048_riscv/build",
+  "command": "/usr/bin/clang -DRISCV  --target=riscv32-unknown-unknown -march=rv32im -ffreestanding -fno-builtin -nostdlib -mno-relax -fno-PIE -G=0 -Oz -flto -o CMakeFiles/2048_rv.dir/src/input.c.o -c /home/comedymaker/2048_riscv/src/input.c",
+  "file": "/home/comedymaker/2048_riscv/src/input.c"
+},
+{
+  "directory": "/home/comedymaker/2048_riscv/build",
+  "command": "/usr/bin/clang -DRISCV  --target=riscv32-unknown-unknown -march=rv32im -ffreestanding -fno-builtin -nostdlib -mno-relax -fno-PIE -G=0 -Oz -flto -o CMakeFiles/2048_rv.dir/src/devicelib.c.o -c /home/comedymaker/2048_riscv/src/devicelib.c",
+  "file": "/home/comedymaker/2048_riscv/src/devicelib.c"
+}
+]

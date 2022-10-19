@@ -7,13 +7,12 @@
  */
 
 #define _XOPEN_SOURCE 500
-#include <termios.h>
 #include <stdint.h>
 //#include <time.h>	//function in time.h need to be exchanged! 
-#include <signal.h>
 #include "devicelib.h"
-#include "input.c"
+#include "input.h"
 #include "draw.h"
+#include "random.h"
 #define SIZE 4
 uint32_t score = 0;
 uint8_t scheme = 0;
@@ -293,10 +292,10 @@ void addRandom(uint8_t board[SIZE][SIZE])
 
 	if (len > 0)
 	{
-		r = rand() % len;
+		r = my_rand() % len;
 		x = list[r][0];
 		y = list[r][1];
-		n = (rand() % 10) / 9 + 1;
+		n = (my_rand() % 10) / 9 + 1;
 		board[x][y] = n;
 	}
 }
@@ -451,11 +450,14 @@ int main(int argc, char *argv[])
 
 	// register signal handler for when ctrl-c is pressed
 	// signal(SIGINT, signal_callback_handler);
+	wait_any_key_down(&key);
+	draw_start_view2();
+	wait_any_key_down(&key);
 	int64_t game_start_time = time();
 	//srand(game_start_time);
 	initBoard(board);
 	// setBufferedInput(false);
-	wait_any_key_down(&key);
+	
 	while (true)
 	{
 		// c = getchar();
@@ -489,7 +491,10 @@ int main(int argc, char *argv[])
 		// default:
 		// 	success = false;
 		// }
+		memset(&key, 0, sizeof(key));
+		my_input_update(&key);
 		success = false;
+		
 		if (key.down)
 		{
 			success = moveDown(board);
@@ -509,15 +514,17 @@ int main(int argc, char *argv[])
 		{
 			success = moveRight(board);
 		}
+
+		
 		if (success)
 		{
 			// drawBoard(board);
 			sleep(150000);
 			addRandom(board);
-			// drawBoard(board);
+			draw_board(board);
 			if (gameEnded(board))
 			{
-				printf("         GAME OVER          \n");
+				// printf("         GAME OVER          \n");
 				break;
 			}
 		}
@@ -541,10 +548,10 @@ int main(int argc, char *argv[])
 		// 	}
 		// 	drawBoard(board);
 		// }
-		wait_any_key_down(&key);
+		
 	}
 	// setBufferedInput(true);
-
+	
 	// printf("\033[?25h\033[m");
 
 	return 0;

@@ -1,0 +1,3 @@
+/home/comedymaker/2048_riscv/build/CMakeFiles/2048_rv.dir
+/home/comedymaker/2048_riscv/build/CMakeFiles/edit_cache.dir
+/home/comedymaker/2048_riscv/build/CMakeFiles/rebuild_cache.dir

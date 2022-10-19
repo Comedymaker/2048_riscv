@@ -28,6 +28,7 @@ int input_update(struct KeyMap* key) {
   static enum AutomataStatus status = Start;
   while (keyboard_ready()) {
     uint8_t cur = keyboard_data();
+
     switch (status) {
     case Start:
       switch (cur) {
@@ -41,10 +42,10 @@ int input_update(struct KeyMap* key) {
       case K_X:
       case K_C:
       case K_SPACE:
-      case K_UP:
-      case K_DOWN:
-      case K_LEFT:
-      case K_RIGHT:
+    //  case K_UP:
+    //  case K_DOWN:
+    //  case K_LEFT:
+    //  case K_RIGHT:
         ret |= 1;
         if (cur == K_Z) {
           key->z = 1;
@@ -187,9 +188,93 @@ int input_update(struct KeyMap* key) {
   return ret;
 }
 
+int my_input_update(struct KeyMap* key){
+  if (!keyboard_ready()) {
+    return 0;
+  }
+  int ret = 0;
+  enum __attribute__((__packed__)) AutomataStatus {
+    Start,
+    Arrows,
+    BeforeReleaseArrows,
+  };
+  static enum AutomataStatus status = Start;
+  
+  while (keyboard_ready())
+  {
+    /* code */
+    uint8_t cur = keyboard_data();
+    switch (status)
+  {
+  case Start:
+    switch (cur)
+    {
+    case K_ARROW_PREFIX :
+      /* code */
+      status = Arrows;
+      break;
+    
+    default:
+      break;
+    }
+    break;
+
+  case Arrows:
+    switch (cur)
+    {
+    case K_RELEASE_PREFIX:
+        status = BeforeReleaseArrows;
+        break;
+      case K_LEFT:
+      case K_RIGHT:
+      case K_UP:
+      case K_DOWN:
+        if (cur == K_UP) {
+          key->up = 1;
+        }
+        if (cur == K_DOWN) {
+          key->down = 1;
+        }
+        if (cur == K_LEFT) {
+          key->left  = 1;
+        }
+        if (cur == K_RIGHT) {
+          key->right = 1;
+        }
+        status = 3;
+      break;
+    default:
+      break;
+    }
+    break;
+
+  default:
+    status = Start;
+    break;
+  }
+  if (status == 3)
+  {
+    /* code */
+    ret = 0;
+    break;
+  }
+  if (status == 2)
+  {
+    /* code */
+    cur = keyboard_data();
+    ret = 1;
+    break;
+  }
+  
+  }
+  return ret;
+  
+  
+}
+
 void wait_any_key_down(struct KeyMap* key) {
   while (1) {
-    int res = input_update(key);
+    int res = my_input_update(key);
     memset(key, 0, sizeof(struct KeyMap));
     if ((res & 1) == 1) {
       return;

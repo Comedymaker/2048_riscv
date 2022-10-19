@@ -1,5 +1,5 @@
 #pragma once
-#include "block.h"
+#include "color.h"
 #include <stdint.h>
 
 // Size of the stage
@@ -34,7 +34,32 @@
 
 // void draw(struct Field* f, uint32_t garbage_cnt, uint32_t apm);
 void draw_start_view();
+void draw_start_view2();
 void draw_end_view();
-void draw_number(int x, int y, uint8_t num, enum BlockType b);
-void draw_apm(uint32_t apm);
-void draw_garbage_indicator(uint32_t garbage_cnt);
+void draw_num(uint8_t x, uint8_t y, uint8_t num);
+void draw_board(uint8_t board[4][4]);
+void draw_none(uint32_t left, uint32_t top);
+
+void draw2(uint32_t left, uint32_t top);
+
+void draw4(uint32_t left, uint32_t top);
+
+void draw8(uint32_t left, uint32_t top);
+
+void draw16(uint32_t left, uint32_t top);
+
+void draw32(uint32_t left, uint32_t top);
+
+void draw64(uint32_t left, uint32_t top);
+
+void draw128(uint32_t left, uint32_t top);
+
+
+void draw256(uint32_t left, uint32_t top);
+
+void draw512(uint32_t left, uint32_t top);
+
+void draw1024(uint32_t left, uint32_t top);
+
+void draw2048(uint32_t left, uint32_t top);
+
